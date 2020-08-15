@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"crypto/sha256"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -19,7 +19,8 @@ type chainHandler struct {
 	corpi string
 	chain *gomarkov.Chain
 	// Chain requires a seed to start generation
-	seeds []string
+	seeds     []string
+	tokenizer Tokenizer
 }
 
 // Returns a len 3 seed for the random generator
@@ -31,10 +32,21 @@ func (h *chainHandler) getSeed() []string {
 	return s
 }
 
+func (h *chainHandler) writeNewEntry(data []byte) error {
+	// Add new data to chain
+	hash := sha256.Sum256(data)
+	h.chain.Add(h.tokenizer.tokenize(data))
+	err := ioutil.WriteFile(filepath.Join(h.corpi, string(hash[0:10])), data, 0644)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (h *chainHandler) getInput() ([]string, error) {
 	tokens := []string{gomarkov.StartToken}
 	for tokens[len(tokens)-1] != gomarkov.EndToken {
-		fmt.Println("tokens", tokens)
+		log.Println("tokens", tokens)
 		next, err := h.chain.Generate(tokens[(len(tokens) - 1):])
 		if err != nil {
 			return tokens, err
@@ -51,7 +63,7 @@ func createChain(corpi string, t Tokenizer) *chainHandler {
 
 	seeds := loadDirectory(corpi, chain, t)
 
-	return &chainHandler{corpi, chain, seeds}
+	return &chainHandler{corpi, chain, seeds, t}
 }
 
 // loadDirectory takes a directory and parses each file in it, applying

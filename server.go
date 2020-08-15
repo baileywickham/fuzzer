@@ -29,7 +29,18 @@ func (h *chainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(j)
 	case "POST":
-		println("hello")
+		var j mkResp
+		err := json.NewDecoder(r.Body).Decode(&j)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		data, err := base64.StdEncoding.DecodeString(j.Input)
+		err = h.writeNewEntry(data)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 }
 
