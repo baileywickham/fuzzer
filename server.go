@@ -38,7 +38,12 @@ func startServers(listenPort string, fuzzingCorpi []string) {
 		// Use tokenizeBySpaces by default
 		// Use corpi name as default path
 		// Other tokenizers are in tokenizer.go
-		createEndpoint(corpi, corpi, tokenizeBySpaces{})
+		if strings.HasPrefix(corpi, "./") {
+			// fix awkward url when using ./directory
+			createEndpoint(corpi, corpi[2:], tokenizeBySpaces{})
+		} else {
+			createEndpoint(corpi, corpi, tokenizeBySpaces{})
+		}
 	}
 
 	log.Println("Listening on :" + listenPort)
@@ -49,7 +54,7 @@ func startServers(listenPort string, fuzzingCorpi []string) {
 func createEndpoint(corpi, url string, t Tokenizer) {
 	h := createChain(corpi, t)
 	http.Handle("/"+url, h)
-	log.Println("Serving ", corpi, "on /"+corpi)
+	log.Println("Serving ", corpi, "on /"+url)
 }
 
 func main() {
