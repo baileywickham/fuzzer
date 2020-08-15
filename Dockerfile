@@ -6,6 +6,7 @@ RUN git clone https://github.com/strongcourage/fuzzing-corpus.git
 COPY . .
 RUN go get -d -v ./...
 
+EXPOSE 8080
 CMD go run . --port=8080 fuzzing-corpus/xml/mozilla
 
 
