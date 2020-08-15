@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -22,12 +23,25 @@ type chainHandler struct {
 }
 
 // Returns a len 3 seed for the random generator
-func (c *chainHandler) getSeed() []string {
+func (h *chainHandler) getSeed() []string {
 	s := make([]string, 0)
 	for i := 0; i < 3; i++ {
-		s = append(s, c.seeds[rand.Intn(len(c.seeds))])
+		s = append(s, h.seeds[rand.Intn(len(h.seeds))])
 	}
 	return s
+}
+
+func (h *chainHandler) getInput() ([]string, error) {
+	tokens := []string{gomarkov.StartToken}
+	for tokens[len(tokens)-1] != gomarkov.EndToken {
+		fmt.Println("tokens", tokens)
+		next, err := h.chain.Generate(tokens[(len(tokens) - 1):])
+		if err != nil {
+			return tokens, err
+		}
+		tokens = append(tokens, next)
+	}
+	return tokens, nil
 }
 
 // Creates a new chain based on the data in fuzzingDir
@@ -70,7 +84,7 @@ func loadDirectory(fuzzingDir string, chain *gomarkov.Chain, t Tokenizer) []stri
 			// If too few tokens, add all of them
 			s = append(s, tokens...)
 		} else {
-			for i := 0; i < 2; i++ {
+			for i := 0; i < 8; i++ {
 				// Add 2 tokens per file
 				s = append(s, tokens[rand.Int()%len(tokens)])
 			}
