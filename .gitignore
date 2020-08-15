@@ -1,3 +1,4 @@
+fuzzing-corpus
 # Binaries for programs and plugins
 *.exe
 *.exe~
