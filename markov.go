@@ -35,8 +35,9 @@ func (h *chainHandler) getSeed() []string {
 func (h *chainHandler) writeNewEntry(data []byte) error {
 	// Add new data to chain
 	hash := sha256.Sum256(data)
+	log.Println("Writing new entry to:", string(hash[0:32]))
 	h.chain.Add(h.tokenizer.tokenize(data))
-	err := ioutil.WriteFile(filepath.Join(h.corpi, string(hash[0:10])), data, 0644)
+	err := ioutil.WriteFile(filepath.Join(h.corpi, string(hash[0:32])), data, 0644)
 	if err != nil {
 		return err
 	}
