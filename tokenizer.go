@@ -1,6 +1,8 @@
 package main
 
-import "strings"
+import (
+	"strings"
+)
 
 type Tokenizer interface {
 	tokenize([]byte) []string
@@ -13,5 +15,14 @@ type tokenizeBySpaces struct {
 }
 
 func (t tokenizeBySpaces) tokenize(data []byte) []string {
-	return strings.Split(string(data), " ")
+	strs := strings.Split(string(data), " ")
+	s := make([]string, 0)
+	for _, str := range strs {
+		str = strings.TrimSpace(str)
+		if len(str) == 0 {
+			continue
+		}
+		s = append(s, str)
+	}
+	return s
 }
