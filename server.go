@@ -6,6 +6,7 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"strings"
 )
 
 // Only used as the json response for the API
@@ -16,10 +17,11 @@ type mkResp struct {
 func (h *chainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		mk, err := h.chain.Generate(h.getSeed())
-		log.Println(mk)
+		tokens, err := h.getInput()
+		// Print tokens in human readable form
+		log.Println(tokens)
 		// Converts the markov generated text to base64 then to json
-		j, err := json.Marshal(mkResp{base64.StdEncoding.EncodeToString([]byte(mk))})
+		j, err := json.Marshal(mkResp{base64.StdEncoding.EncodeToString([]byte(strings.Join(tokens, "")))})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -34,6 +36,7 @@ func (h *chainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func startServers(listenPort string, fuzzingCorpi []string) {
 	for _, corpi := range fuzzingCorpi {
 		// Use tokenizeBySpaces by default
+		// Use corpi name as default path
 		// Other tokenizers are in tokenizer.go
 		createEndpoint(corpi, corpi, tokenizeBySpaces{})
 	}
