@@ -10,7 +10,7 @@ The easiest way to use this program is through docker. The `dock.sh` runs the pr
 curl localhost:8080/fuzzing-corpus/xml/mozilla
 ```
 
-You can also run on your local machine. The program requires [gomarkov](https://mb-14.github.io/tech/2018/10/24/gomarkov.html), which should be automaticly downloaded using `go run .`. The default port is `:8080`.
+You can also run on your local machine. The program requires [gomarkov](https://github.com/mb-14/gomarkov), which should be automaticly downloaded using `go run .`. The default port is `:8080`.
 ```golang
 go run . -port=8080 corpus-directory1 corpus-directory2
 ```
