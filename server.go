@@ -35,7 +35,7 @@ func startServers(listenPort string, fuzzingCorpi []string) {
 	for _, corpi := range fuzzingCorpi {
 		// Use tokenizeBySpaces by default
 		// Other tokenizers are in tokenizer.go
-		createEndpoint(corpi, tokenizeBySpaces{})
+		createEndpoint(corpi, corpi, tokenizeBySpaces{})
 	}
 
 	log.Println("Listening on :" + listenPort)
@@ -43,9 +43,9 @@ func startServers(listenPort string, fuzzingCorpi []string) {
 }
 
 // Creates a markov chain and a coresponding API endpoink
-func createEndpoint(corpi string, t Tokenizer) {
+func createEndpoint(corpi, url string, t Tokenizer) {
 	h := createChain(corpi, t)
-	http.Handle("/"+corpi, h)
+	http.Handle("/"+url, h)
 	log.Println("Serving ", corpi, "on /"+corpi)
 }
 
