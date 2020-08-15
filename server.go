@@ -8,32 +8,51 @@ import (
 	"net/http"
 )
 
-type resp struct {
+// Only used as the json response for the API
+type mkResp struct {
 	Input string
 }
 
-func startServer(listenPort string) {
-	http.HandleFunc("/", response)
+func (h *chainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "GET":
+		mk, err := h.chain.Generate(h.getSeed())
+		log.Println(mk)
+		// Converts the markov generated text to base64 then to json
+		j, err := json.Marshal(mkResp{base64.StdEncoding.EncodeToString([]byte(mk))})
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(j)
+	case "POST":
+		println("hello")
+	}
+}
+
+func startServers(listenPort string, fuzzingCorpi []string) {
+	for _, corpi := range fuzzingCorpi {
+		// Use tokenizeBySpaces by default
+		// Other tokenizers are in tokenizer.go
+		createEndpoint(corpi, tokenizeBySpaces{})
+	}
+
+	log.Println("Listening on :" + listenPort)
 	log.Fatal(http.ListenAndServe(":"+listenPort, nil))
 }
 
-func response(w http.ResponseWriter, r *http.Request) {
-	// Gets the next markov prediction
-	markov, err := getNextMarkovPred()
-	j, err := json.Marshal(resp{base64.StdEncoding.EncodeToString([]byte(markov))})
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(j)
+// Creates a markov chain and a coresponding API endpoink
+func createEndpoint(corpi string, t Tokenizer) {
+	h := createChain(corpi, t)
+	http.Handle("/"+corpi, h)
+	log.Println("Serving ", corpi, "on /"+corpi)
 }
 
 func main() {
 	listenPort := flag.String("port", "8080", "Port to serve on")
-	fuzzingDir := flag.String("corpus-location", ".", "location of test corpus")
 	flag.Parse()
 
-	createChain(*fuzzingDir)
-	startServer(*listenPort)
+	fuzzingCorpi := flag.Args()
+	startServers(*listenPort, fuzzingCorpi)
 }
