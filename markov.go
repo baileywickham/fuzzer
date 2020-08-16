@@ -4,7 +4,6 @@ import (
 	"crypto/sha256"
 	"io/ioutil"
 	"log"
-	"math/rand"
 	"os"
 	"path/filepath"
 
@@ -19,17 +18,7 @@ type chainHandler struct {
 	corpi string
 	chain *gomarkov.Chain
 	// Chain requires a seed to start generation
-	seeds     []string
 	tokenizer Tokenizer
-}
-
-// Returns a len 3 seed for the random generator
-func (h *chainHandler) getSeed() []string {
-	s := make([]string, 0)
-	for i := 0; i < 3; i++ {
-		s = append(s, h.seeds[rand.Intn(len(h.seeds))])
-	}
-	return s
 }
 
 func (h *chainHandler) writeNewEntry(data []byte) error {
@@ -62,18 +51,16 @@ func (h *chainHandler) getInput() ([]string, error) {
 func createChain(corpi string, t Tokenizer) *chainHandler {
 	chain := gomarkov.NewChain(1) // TODO figure out what this number is
 
-	seeds := loadDirectory(corpi, chain, t)
+	loadDirectory(corpi, chain, t)
 
-	return &chainHandler{corpi, chain, seeds, t}
+	return &chainHandler{corpi, chain, t}
 }
 
 // loadDirectory takes a directory and parses each file in it, applying
 // the function tokenize to the filedata and adding the response to the
 // chain instance
 // it returns a slice of strings which is the seed for mk generation
-func loadDirectory(fuzzingDir string, chain *gomarkov.Chain, t Tokenizer) []string {
-	s := make([]string, 0)
-
+func loadDirectory(fuzzingDir string, chain *gomarkov.Chain, t Tokenizer) {
 	// fuzzingDir does no authentication, should probably limit to current dir
 	err := filepath.Walk(fuzzingDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -93,20 +80,10 @@ func loadDirectory(fuzzingDir string, chain *gomarkov.Chain, t Tokenizer) []stri
 
 		// This is ineffecient, TODO make more efficent
 		tokens := t.tokenize(data)
-		if len(tokens) < 4 {
-			// If too few tokens, add all of them
-			s = append(s, tokens...)
-		} else {
-			for i := 0; i < 8; i++ {
-				// Add 2 tokens per file
-				s = append(s, tokens[rand.Int()%len(tokens)])
-			}
-		}
 		chain.Add(tokens)
 		return nil
 	})
 	if err != nil {
 		log.Println("Error parsing file:", err) // err parsing file, print and ignore
 	}
-	return s
 }
