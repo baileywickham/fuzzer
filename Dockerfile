@@ -9,4 +9,3 @@ RUN go get -d -v ./...
 EXPOSE 8080
 CMD go run . --port=8080 fuzzing-corpus/xml/mozilla
 
-
