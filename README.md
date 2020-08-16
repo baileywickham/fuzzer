@@ -56,6 +56,8 @@ While the parsing would be a good place to impliment goroutines, I felt the like
 ### Why does your project not conform to the design spec given?
 My program does not use the `--corpus-location` paramater, instead all arguments are assumed to be locations by default. This is because I wanted to handle having one server with multiple markov chains, and it was simplest to use all arguments as locations.
 
+Also the 'I' in the response json is capitalized here because the default json library only marshalls exported fields by default, and it was a small change from the doc. 
+
 ### Can I change the location a chain is served on? What about using a different tokenizer?
 Well you can change both of them, but that involves changing the source code. Ideally, these would both be command line options, but that would take longer to impliment. Ideally, you could extend this server as a package, which would allow for easy modification.
 
