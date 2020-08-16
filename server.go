@@ -73,5 +73,6 @@ func main() {
 	flag.Parse()
 
 	fuzzingCorpi := flag.Args()
+	createEndpoint("./fuzzing-corpus/wav/mozilla/", "wav", tokenizeWav{})
 	startServers(*listenPort, fuzzingCorpi)
 }

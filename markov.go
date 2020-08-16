@@ -25,7 +25,8 @@ func (h *chainHandler) writeNewEntry(data []byte) error {
 	// Add new data to chain
 	hash := sha256.Sum256(data)
 	log.Println("Writing new entry to:", string(hash[0:32]))
-	h.chain.Add(h.tokenizer.tokenize(data))
+	// Comment out only on this branch
+	// h.chain.Add(h.tokenizer.tokenize(data))
 	err := ioutil.WriteFile(filepath.Join(h.corpi, string(hash[0:32])), data, 0644)
 	if err != nil {
 		return err
@@ -73,13 +74,13 @@ func loadDirectory(fuzzingDir string, chain *gomarkov.Chain, t Tokenizer) {
 		}
 
 		log.Println("Parsing: ", path)
-		data, err := ioutil.ReadFile(path)
+		f, err := os.Open(path)
 		if err != nil {
 			return err
 		}
 
 		// This is ineffecient, TODO make more efficent
-		tokens := t.tokenize(data)
+		tokens := t.tokenize(f)
 		chain.Add(tokens)
 		return nil
 	})
