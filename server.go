@@ -18,7 +18,7 @@ func (h *chainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
 		tokens, err := h.getInput()
-		// Print tokens in human readable form
+		// Print tokens in "human readable" form
 		log.Println(tokens)
 		// Converts the markov generated text to base64 then to json
 		j, err := json.Marshal(mkResp{base64.StdEncoding.EncodeToString([]byte(strings.Join(tokens, "")))})
@@ -29,6 +29,7 @@ func (h *chainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(j)
 	case "POST":
+		// handle "Live Updates"
 		var j mkResp
 		err := json.NewDecoder(r.Body).Decode(&j)
 		if err != nil {
@@ -46,15 +47,17 @@ func (h *chainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func startServers(listenPort string, fuzzingCorpi []string) {
 	for _, corpi := range fuzzingCorpi {
-		// Use tokenizeBySpaces by default
-		// Use corpi name as default path
-		// Other tokenizers are in tokenizer.go
+		var url string
 		if strings.HasPrefix(corpi, "./") {
 			// fix awkward url when using ./directory
-			createEndpoint(corpi, corpi[2:], tokenizeBySpaces{})
+			url = corpi[2:]
 		} else {
-			createEndpoint(corpi, corpi, tokenizeBySpaces{})
+			// Use corpi name as default path
+			url = corpi
 		}
+		// Use tokenizeBySpaces by default
+		// Other tokenizers are in tokenizer.go
+		createEndpoint(corpi, url, tokenizeBySpaces{})
 	}
 
 	log.Println("Listening on :" + listenPort)
@@ -72,6 +75,7 @@ func main() {
 	listenPort := flag.String("port", "8080", "Port to serve on")
 	flag.Parse()
 
+	// Take each trailing input as an input corpus
 	fuzzingCorpi := flag.Args()
 	startServers(*listenPort, fuzzingCorpi)
 }

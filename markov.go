@@ -10,21 +10,23 @@ import (
 	"github.com/mb-14/gomarkov"
 )
 
-// Seed for fetching random elts of slice
-// for markov generation
-
+// Struct which impliments ServeHttp to associate
+// data with each api endpoint.
+// See http.Handler for more detail
 type chainHandler struct {
 	// Name/filepath of corpi
 	corpi string
 	chain *gomarkov.Chain
-	// Chain requires a seed to start generation
+	// interface which tokenizes input file
 	tokenizer Tokenizer
 }
 
+// Support for adding a new entry to the chain,
+// including saving the file to disk for later
 func (h *chainHandler) writeNewEntry(data []byte) error {
-	// Add new data to chain
 	hash := sha256.Sum256(data)
 	log.Println("Writing new entry to:", string(hash[0:32]))
+	// Add new data to chain
 	h.chain.Add(h.tokenizer.tokenize(data))
 	err := ioutil.WriteFile(filepath.Join(h.corpi, string(hash[0:32])), data, 0644)
 	if err != nil {
@@ -33,10 +35,10 @@ func (h *chainHandler) writeNewEntry(data []byte) error {
 	return nil
 }
 
+// Returns markov generated input
 func (h *chainHandler) getInput() ([]string, error) {
 	tokens := []string{gomarkov.StartToken}
 	for tokens[len(tokens)-1] != gomarkov.EndToken {
-		log.Println("tokens", tokens)
 		next, err := h.chain.Generate(tokens[(len(tokens) - 1):])
 		if err != nil {
 			return tokens, err
@@ -59,7 +61,6 @@ func createChain(corpi string, t Tokenizer) *chainHandler {
 // loadDirectory takes a directory and parses each file in it, applying
 // the function tokenize to the filedata and adding the response to the
 // chain instance
-// it returns a slice of strings which is the seed for mk generation
 func loadDirectory(fuzzingDir string, chain *gomarkov.Chain, t Tokenizer) {
 	// fuzzingDir does no authentication, should probably limit to current dir
 	err := filepath.Walk(fuzzingDir, func(path string, info os.FileInfo, err error) error {

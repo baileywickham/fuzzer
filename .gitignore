@@ -1,4 +1,5 @@
 fuzzing-corpus
+test-corpus
 *.xml
 # Binaries for programs and plugins
 *.exe
