@@ -5,6 +5,8 @@ See the **WAV** branch for half baked WAV tokenizing support.
 
 See the **mutation** branch for the mutation implimentation.
 
+See the mutation branch for an implimentation of mutation.
+
 ## Use
 
 ### Generation

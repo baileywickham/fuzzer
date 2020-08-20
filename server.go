@@ -17,7 +17,7 @@ type mkResp struct {
 func (h *chainHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		tokens, err := h.getInput()
+		tokens, err := h.getMutatedInput()
 		// Print tokens in "human readable" form
 		log.Println(tokens)
 		// Converts the markov generated text to base64 then to json
@@ -57,7 +57,7 @@ func startServers(listenPort string, fuzzingCorpi []string) {
 		}
 		// Use tokenizeBySpaces by default
 		// Other tokenizers are in tokenizer.go
-		createEndpoint(corpi, url, tokenizeBySpaces{})
+		createEndpoint(corpi, url, tokenizeBySpaces{}, nonMutator{}, sortMutator{})
 	}
 
 	log.Println("Listening on :" + listenPort)
@@ -65,8 +65,8 @@ func startServers(listenPort string, fuzzingCorpi []string) {
 }
 
 // Creates a markov chain and a coresponding API endpoink
-func createEndpoint(corpi, url string, t Tokenizer) {
-	h := createChain(corpi, t)
+func createEndpoint(corpi, url string, t Tokenizer, pre Premutator, post Postmutator) {
+	h := createChain(corpi, t, pre, post)
 	http.Handle("/"+url, h)
 	log.Println("Serving ", corpi, "on /"+url)
 }
