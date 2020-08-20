@@ -1,4 +1,4 @@
-module github.com/baileywickham/fuzzbuzz
+module github.com/baileywickham/fuzzer
 
 go 1.14
 
