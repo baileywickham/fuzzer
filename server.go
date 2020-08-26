@@ -3,10 +3,11 @@ package main
 import (
 	"encoding/base64"
 	"encoding/json"
-	"flag"
 	"log"
 	"net/http"
 	"strings"
+
+	r "github.com/baileywickham/runner"
 )
 
 // Only used as the json response for the API
@@ -72,10 +73,16 @@ func createEndpoint(corpi, url string, t Tokenizer, pre Premutator, post Postmut
 }
 
 func main() {
-	listenPort := flag.String("port", "8080", "Port to serve on")
-	flag.Parse()
+	//listenPort := flag.String("port", "8080", "Port to serve on")
+	//flag.Parse()
 
 	// Take each trailing input as an input corpus
-	fuzzingCorpi := flag.Args()
-	startServers(*listenPort, fuzzingCorpi)
+	//fuzzingCorpi := flag.Args()
+	//startServers(*listenPort, fuzzingCorpi)
+	s := r.NewShell()
+	s.Add_command(r.Command{
+		Cmd:      "start",
+		Callback: startServers,
+		Helptext: "Start a list of servers"})
+	s.Start()
 }
