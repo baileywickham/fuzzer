@@ -1,4 +1,6 @@
 # Fuzzer
+![CI](https://github.com/baileywickham/fuzzer/workflows/CI/badge.svg)
+
 A fuzzing server which generates input using a markov chain. 
 
 Built using go 1.14 on Linux Mint
