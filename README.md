@@ -1,5 +1,5 @@
 # Fuzzer
-![CI](https://github.com/baileywickham/fuzzer/workflows/CI/badge.svg)
+[![CI](https://github.com/baileywickham/fuzzer/actions/workflows/build.yml/badge.svg)](https://github.com/baileywickham/fuzzer/actions/workflows/build.yml)
 
 A fuzzing server which generates input using a markov chain. 
 
